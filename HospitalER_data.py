@@ -13,7 +13,22 @@ print("Data loaded successfully")
 print(df.head())
 
 # Display the shape of the DataFrame
-print(f"DataFrame shape: {df.shape}")
+print(f"DataFrame shape: {df.shape[1]}")
+print(df.describe())
+#Create full name column by combining first initial and last name
+df["Patient Full Name"] = df["Patient First Inital"].astype(str) + ". " + df["Patient Last Name"].astype(str)
+#Drop the original columns used to create the full name
+df.drop(columns=["Patient First Inital", "Patient Last Name"], inplace=True)
+#change patients CM colum
+df.rename(columns={"Patients CM": "Admission Status"}, inplace=True)
+print(df.columns.tolist())
+
+# Convert the 'Admission Status' column to a categorical type       
+df["Admission Status"] = df["Admission Status"].astype("category")
+
+#Convert Date Column to Datetime
+df["Patient Admission Date"] = pd.to_datetime(df["Patient Admission Date"], errors="coerce", dayfirst=True)
+print(df.head())
 
 # Get the number of missing data points per column
 missing_data = df.isnull().sum()
@@ -38,13 +53,18 @@ print(missing_data)
 
 #print(df["Column"].unique()) # checking the columns with unique values.
 # Convert specific columns to appropriate data types
-df["Patient Id"] = df["Patient Id"].astype("string")
-df["Patient Last Name"] = df["Patient Last Name"].astype("string")      
-df["Patient Admission Date"] = pd.to_datetime(df["Patient Admission Date"], errors="coerce")
-df["Patient_Gender"] = df["Patient Gender"].astype("category")
-df["Patient Race"] = df["Patient Race"].astype("category")
-df["Patient First Inital"] = df["Patient First Inital"].astype("category")
-print(df.dtypes) 
+
+# Only convert columns that still exist after previous operations
+if "Patient Id" in df.columns:
+    df["Patient Id"] = df["Patient Id"].astype("string")
+if "Patient Admission Date" in df.columns:
+    df["Patient Admission Date"] = pd.to_datetime(df["Patient Admission Date"], errors="coerce")
+if "Patient Gender" in df.columns:
+    df["Patient Gender"] = df["Patient Gender"].astype("category")
+if "Patient Race" in df.columns:
+    df["Patient Race"] = df["Patient Race"].astype("category")
+# 'Patient Last Name' and 'Patient First Inital' have been dropped, so skip their conversion
+print(df.dtypes)
 
 #Outlier detection and removal
 print(df.describe())  
@@ -71,7 +91,7 @@ print("Final DataFrame structure:")
 print(df.info())                  
 
 #save the cleaned DataFrame to a new CSV file
-output_file_path = "/home/domie/Desktop/HospitalER_data_cleaned.csv"
+output_file_path = "/home/domie/Desktop/HospitalER_data_cleaned1.csv"
 df.to_csv(output_file_path, index=False)
 print(f"Cleaned data saved to {output_file_path}")          
        
